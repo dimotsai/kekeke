@@ -2,6 +2,8 @@ const _ = require('lodash');
 const Message = require('./Message');
 const KekekeClient = require('./KekekeClient');
 
+class InvalidBotNickName extends Error {}
+
 class Response {
   constructor(client, message, match) {
     this.client = client;
@@ -34,6 +36,9 @@ class Response {
 
 class KekekeBot {
   constructor(anonymousId, topic, nickname = 'KekekeBot') {
+    if (!nickname.match(/bot$/i)) {
+      throw new InvalidBotNickName();
+    }
     this.listeners = [];
     this.client = new KekekeClient(anonymousId, topic, nickname);
   }
