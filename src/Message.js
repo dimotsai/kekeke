@@ -17,7 +17,8 @@ class Message {
     const payload = this.payload;
     return {
       publicId: payload.senderPublicId,
-      nickName: payload.senderNickName
+      nickName: payload.senderNickName,
+      colorToken: payload.senderColorToken
     };
   }
 

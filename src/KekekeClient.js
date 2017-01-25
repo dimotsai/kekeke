@@ -8,7 +8,7 @@ const Message = require('./Message');
 
 class NotLoggedInError extends Error {}
 
-module.exports = class KekekeClient extends EventEmitter {
+class KekekeClient extends EventEmitter {
   constructor(anonymousId, topic, nickname = 'KekekeClient') {
     super();
     this.anonymousId = anonymousId;
@@ -17,6 +17,15 @@ module.exports = class KekekeClient extends EventEmitter {
   }
 
   login() {
+    const offsets = {
+      info: -3,
+      anonymousId: -6,
+      accessToken: -7,
+      colorToken: -9,
+      ip: -12,
+      kerma: -13,
+      publicId: -18
+    };
     const data = `7|0|8|https://kekeke.cc/com.liquable.hiroba.square.gwt.SquareModule/|53263EDF7F9313FDD5BD38B49D3A7A77|com.liquable.hiroba.gwt.client.square.IGwtSquareService|startSquare|com.liquable.hiroba.gwt.client.square.StartSquareRequest/2186526774|${this.anonymousId}|com.liquable.gwt.transport.client.Destination/2061503238|/topic/${this.topic}|1|2|3|4|1|5|5|6|0|7|8|`;
     return request({
       uri: 'https://kekeke.cc/com.liquable.hiroba.gwt.server.GWTHandler/squareService',
@@ -40,9 +49,13 @@ module.exports = class KekekeClient extends EventEmitter {
     }).then(data => {
       const arrString = data.replace(/^\/\/[^[]+/, '');
       const arr = JSON.parse(arrString);
-      this.accessToken = arr[18][2];
-      this.publicId = arr[18][5];
-      this.kerma = arr[8];
+      const len = arr.length;
+      const offs = _.mapValues(offsets, off => len + off);
+      const info = arr[offs.info];
+      this.accessToken = info[arr[offs.accessToken] - 1];
+      this.publicId = info[arr[offs.publicId] - 1];
+      this.colorToken = info[arr[offs.colorToken] - 1];
+      this.kerma = arr[offs.kerma];
       this.emit('login', {
         accessToken: this.accessToken,
         publicId: this.publicId,
@@ -57,6 +70,7 @@ module.exports = class KekekeClient extends EventEmitter {
     const message = new Message('SEND', {
       destination: `/topic/${this.topic}`
     }, {
+      senderColorToken: this.colorToken,
       senderPublicId: this.publicId,
       senderNickName: this.nickname,
       content: entities.encode(text),
@@ -74,6 +88,7 @@ module.exports = class KekekeClient extends EventEmitter {
     const message = new Message('SEND', {
       destination: `/topic/${this.topic}`
     }, {
+      senderColorToken: this.colorToken,
       senderPublicId: this.publicId,
       senderNickName: this.nickname,
       content: entities.encode(`delete ${url}`),
@@ -86,6 +101,10 @@ module.exports = class KekekeClient extends EventEmitter {
 
   getPublicId() {
     return this.publicId;
+  }
+
+  getColorToken() {
+    return this.colorToken;
   }
 
   getNickName() {
@@ -161,4 +180,6 @@ module.exports = class KekekeClient extends EventEmitter {
       }
     });
   }
-};
+}
+
+module.exports = KekekeClient;

@@ -127,6 +127,8 @@ class KekekeBot {
     this.client.on('message', this.handleMessage.bind(this));
     this.client.on('connected', () => {
       console.log(this.client.getNickName(), 'starts!');
+      console.log('Public ID:', this.client.getPublicId());
+      console.log('Color Token:', this.client.getColorToken());
       console.log('Kerma:', this.client.getKerma());
     });
     this.client.login();
