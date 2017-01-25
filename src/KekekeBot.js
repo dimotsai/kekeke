@@ -32,6 +32,10 @@ class Response {
   random(texts, replyPublicIds = []) {
     this.send(_.sample(texts), replyPublicIds);
   }
+
+  deleteMedia(url) {
+    this.client.deleteMedia(url);
+  }
 }
 
 class KekekeBot {
@@ -45,6 +49,14 @@ class KekekeBot {
 
   getNickName() {
     return this.client.getNickName();
+  }
+
+  getPublicId() {
+    return this.client.getPublicId();
+  }
+
+  getKerma() {
+    return this.client.getKerma();
   }
 
   hear(pattern, callback) {
@@ -84,7 +96,7 @@ class KekekeBot {
 
       // check if the message is a response to the bot
       if (message.getReplyPublicIds().indexOf(this.client.getPublicId()) !== -1 ||
-        message.getContent().trim().match(nameRegex, 'i')) {
+        content.trim().match(nameRegex, 'i')) {
         isResponse = true;
       } else {
         listeners = _.filter(listeners, l => l.type !== KekekeBot.listenerTypes.respond);
