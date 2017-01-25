@@ -1,4 +1,6 @@
 const _ = require('lodash');
+const {AllHtmlEntities} = require('html-entities');
+const entities = new AllHtmlEntities();
 
 class Message {
   constructor(type, attributes = {}, payload = {}) {
@@ -8,7 +10,7 @@ class Message {
   }
 
   getContent() {
-    return this.payload.content;
+    return entities.decode(this.payload.content);
   }
 
   getSender() {
