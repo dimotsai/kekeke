@@ -10,7 +10,10 @@ class Message {
   }
 
   getContent() {
-    return entities.decode(this.payload.content);
+    if (this.payload.content) {
+      return entities.decode(this.payload.content);
+    }
+    return this.payload.content;
   }
 
   getSender() {
@@ -77,13 +80,19 @@ class Message {
   }
 }
 
-Message.EventTypes = {
+Message.types = {
+  connected: 'CONNECTED',
+  ping: 'PING',
+  message: 'MESSAGE'
+};
+
+Message.eventTypes = {
   kekeMessage: 'KEKE_MESSAGE',
   chatMessage: 'CHAT_MESSAGE',
   deleteMedia: 'DELETE_MEDIA'
 };
 
-Message.Publishers = {
+Message.publishers = {
   server: 'SERVER',
   clientTransport: 'CLIENT_TRANSPORT'
 };
