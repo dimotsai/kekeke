@@ -1,3 +1,4 @@
+const Promise = require('bluebird');
 const _ = require('lodash');
 const Message = require('./Message');
 const KekekeClient = require('./KekekeClient');
@@ -84,7 +85,7 @@ class KekekeBot {
   }
 
   handleMessage(message) {
-    // check if the message was from a client
+    // check if the message is from a client
     // ignore bot messages to prevent recursions
     if (message.getPublisher() === Message.Publishers.clientTransport &&
       message.getSender().publicId !== this.client.getPublicId() &&
@@ -102,24 +103,39 @@ class KekekeBot {
         listeners = _.filter(listeners, l => l.type !== KekekeBot.listenerTypes.respond);
       }
 
-      // dispatch
-      for (const listener of listeners) {
+      let found;
+      Promise.each(listeners, listener => {
+        // skip remaining if found
+        if (found) {
+          return;
+        }
+
+        const trimmedContent = content.trim().replace(nameRegex, '').trim();
         let match;
         if (listener.type === KekekeBot.listenerTypes.custom) {
-          match = listener.match(content, isResponse);
+          match = listener.match(isResponse ? trimmedContent : content, isResponse);
         } else if (listener.type === KekekeBot.listenerTypes.respond) {
-          const trimmedContent = content.trim().replace(nameRegex, '').trim();
           match = trimmedContent.match(listener.pattern);
         } else {
           // hear
           match = content.match(listener.pattern);
         }
-        // match first found pattern
-        if (match) {
-          listener.callback(new Response(this.client, message, match));
-          break;
+
+        // match could be a value or a promise
+        return Promise.resolve(match).then(m => {
+          if (m) {
+            found = {
+              listener,
+              match: m
+            };
+          }
+        });
+        // Note: Promise.each return the original array
+      }).then(() => {
+        if (found) {
+          return found.listener.callback(new Response(this.client, message, found.match));
         }
-      }
+      });
     }
   }
 
