@@ -87,7 +87,7 @@ class KekekeBot {
   handleMessage(message) {
     // check if the message is from a client
     // ignore bot messages to prevent recursions
-    if (message.getPublisher() === Message.Publishers.clientTransport &&
+    if (message.getPublisher() === Message.publishers.clientTransport &&
       message.getSender().publicId !== this.client.getPublicId() &&
       !message.getSender().nickName.match(/bot$/i)) {
       const content = message.getContent();

@@ -83,7 +83,9 @@ class Message {
 Message.types = {
   connected: 'CONNECTED',
   ping: 'PING',
-  message: 'MESSAGE'
+  pong: 'PONG',
+  message: 'MESSAGE',
+  subscribe: 'SUBSCRIBE'
 };
 
 Message.eventTypes = {

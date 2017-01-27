@@ -1,6 +1,6 @@
 {
   "name": "kekeke",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Kekeke client and utilities for Node",
   "main": "index.js",
   "scripts": {
