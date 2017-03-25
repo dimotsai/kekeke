@@ -8,7 +8,7 @@ const Message = require('./Message');
 
 class NotLoggedInError extends Error {}
 
-class KekekeClient extends EventEmitter {
+class Client extends EventEmitter {
   constructor(anonymousId, topic, nickname = 'KekekeClient') {
     super();
     this.anonymousId = anonymousId;
@@ -182,4 +182,4 @@ class KekekeClient extends EventEmitter {
   }
 }
 
-module.exports = KekekeClient;
+module.exports = Client;

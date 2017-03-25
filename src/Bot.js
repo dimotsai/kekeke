@@ -1,51 +1,18 @@
 const Promise = require('bluebird');
 const _ = require('lodash');
 const Message = require('./Message');
-const KekekeClient = require('./KekekeClient');
+const Client = require('./Client');
+const Response = require('./Response');
 
 class InvalidBotNickName extends Error {}
 
-class Response {
-  constructor(client, message, match) {
-    this.client = client;
-    this.match = match;
-    this.message = message;
-    this.text = message.getContent();
-  }
-
-  send(text, replyPublicIds = []) {
-    let ids = [];
-    if (!_.isArray(replyPublicIds)) {
-      ids = [replyPublicIds];
-    }
-    this.client.sendText(text, ids);
-  }
-
-  reply(text_, shouldTagNickName = true) {
-    const sender = this.message.getSender();
-    let text = text_;
-    if (shouldTagNickName) {
-      text = `@${sender.nickName} ${text_}`;
-    }
-    this.send(text, sender.publicId);
-  }
-
-  random(texts, replyPublicIds = []) {
-    this.send(_.sample(texts), replyPublicIds);
-  }
-
-  deleteMedia(url) {
-    this.client.deleteMedia(url);
-  }
-}
-
-class KekekeBot {
+class Bot {
   constructor(anonymousId, topic, nickname = 'KekekeBot') {
     if (!nickname.match(/bot$/i)) {
       throw new InvalidBotNickName();
     }
     this.listeners = [];
-    this.client = new KekekeClient(anonymousId, topic, nickname);
+    this.client = new Client(anonymousId, topic, nickname);
   }
 
   getNickName() {
@@ -62,7 +29,7 @@ class KekekeBot {
 
   hear(pattern, callback) {
     this.listeners.push({
-      type: KekekeBot.listenerTypes.hear,
+      type: Bot.listenerTypes.hear,
       pattern,
       callback
     });
@@ -70,7 +37,7 @@ class KekekeBot {
 
   respond(pattern, callback) {
     this.listeners.push({
-      type: KekekeBot.listenerTypes.respond,
+      type: Bot.listenerTypes.respond,
       pattern,
       callback
     });
@@ -78,7 +45,7 @@ class KekekeBot {
 
   listen(match, callback) {
     this.listeners.push({
-      type: KekekeBot.listenerTypes.custom,
+      type: Bot.listenerTypes.custom,
       match,
       callback
     });
@@ -100,7 +67,7 @@ class KekekeBot {
         content.trim().match(nameRegex, 'i')) {
         isResponse = true;
       } else {
-        listeners = _.filter(listeners, l => l.type !== KekekeBot.listenerTypes.respond);
+        listeners = _.filter(listeners, l => l.type !== Bot.listenerTypes.respond);
       }
 
       let found;
@@ -112,9 +79,9 @@ class KekekeBot {
 
         const trimmedContent = content.trim().replace(nameRegex, '').trim();
         let match;
-        if (listener.type === KekekeBot.listenerTypes.custom) {
+        if (listener.type === Bot.listenerTypes.custom) {
           match = listener.match(isResponse ? trimmedContent : content, isResponse);
-        } else if (listener.type === KekekeBot.listenerTypes.respond) {
+        } else if (listener.type === Bot.listenerTypes.respond) {
           match = trimmedContent.match(listener.pattern);
         } else {
           // hear
@@ -151,10 +118,10 @@ class KekekeBot {
   }
 }
 
-KekekeBot.listenerTypes = {
+Bot.listenerTypes = {
   hear: 'HEAR',
   respond: 'RESPOND',
   custom: 'CUSTOM'
 };
 
-module.exports = KekekeBot;
+module.exports = Bot;

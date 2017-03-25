@@ -1,5 +1,5 @@
 module.exports = {
-  Client: require('./src/KekekeClient'),
-  Bot: require('./src/KekekeBot'),
+  Client: require('./src/Client'),
+  Bot: require('./src/Bot'),
   Message: require('./src/Message')
 };
