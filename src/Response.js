@@ -6,14 +6,33 @@ class Response {
     this.match = match;
     this.message = message;
     this.text = message.getContent();
+    this.middlewares = null;
   }
 
-  send(text, replyPublicIds = []) {
+  setMiddlewares(middlewares) {
+    this.middlewares = middlewares;
+  }
+
+  _send(method, text, replyPublicIds = []) {
     let ids = [];
     if (!_.isArray(replyPublicIds)) {
       ids = [replyPublicIds];
     }
-    this.client.sendText(text, ids);
+    if (this.middlewares) {
+      this.middlewares.execute({
+        response: this,
+        text,
+        replyPublicIds: ids,
+        method
+      })
+      .then(() => this.client.sendText(text, ids));
+    } else {
+      this.client.sendText(text, ids);
+    }
+  }
+
+  send(text, replyPublicIds = []) {
+    this._send('send', text, replyPublicIds);
   }
 
   reply(text_, shouldTagNickName = true) {
@@ -22,7 +41,7 @@ class Response {
     if (shouldTagNickName) {
       text = `@${sender.nickName} ${text_}`;
     }
-    this.send(text, sender.publicId);
+    this._send('reply', text, sender.publicId);
   }
 
   random(texts, replyPublicIds = []) {
