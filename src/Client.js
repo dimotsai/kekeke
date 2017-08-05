@@ -63,6 +63,9 @@ class Client extends EventEmitter {
       });
     }).then(() => {
       return this._initWebSocket();
+    }).catch(e => {
+      console.error(e);
+      process.exit(1);
     });
   }
 

@@ -52,11 +52,11 @@ class Bot {
       const trimmedContent = content.trim().replace(nameRegex, '').trim();
       let match;
       if (listener.type === Bot.listenerTypes.custom) {
-        match = listener.match(isResponse ? trimmedContent : content, isResponse);
+        match = listener.match(isResponse ? trimmedContent : content, isResponse, message.isBroadcast());
       } else if (listener.type === Bot.listenerTypes.respond) {
         match = trimmedContent.match(listener.pattern);
-      } else {
-        // hear
+      } else if (message.isBroadcast()) {
+        // hear a message that does not reply to anyone
         match = content.match(listener.pattern);
       }
 

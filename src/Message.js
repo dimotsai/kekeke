@@ -40,6 +40,10 @@ class Message {
     return this.attributes.publisher;
   }
 
+  isBroadcast() {
+    return this.getReplyPublicIds().length === 0;
+  }
+
   toString() {
     let str = '';
     str += this.type + '\n';
